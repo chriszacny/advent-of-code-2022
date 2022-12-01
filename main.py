@@ -1,9 +1,24 @@
+"""
+Advent of code 2022 Day 1. 
+
+TODO: This is HACKY code. These functions need to be split and a lot of error conditions checked for.
+
+"""
+
 import unittest
 import os
 import functools
 
 
-def get_total_calories_from_elf_with_most_calories(rawdata: str) -> int:
+def get_top_three_summed(resultsList: list[int]) -> int:
+    return functools.reduce(lambda a, b: a + b, resultsList[0:3])
+
+
+def get_top_one(resultsList: list[int]) -> int:
+    return functools.reduce(lambda a, b: a if a > b else b, resultsList)
+
+
+def get_each_elf_total_calories_results_sorted_list(rawdata: str) -> int:
     results = []
     data_arr = rawdata.split(os.linesep)
     i = 0
@@ -18,8 +33,8 @@ def get_total_calories_from_elf_with_most_calories(rawdata: str) -> int:
                 results.append(int_data)
             else:
                 results[i] += int_data
-    toReturn = functools.reduce(lambda a, b: a if a > b else b, results)
-    return toReturn
+    sortedResults = sorted(results, reverse=True)
+    return sortedResults
 
 
 class TestElfCalorieCalculator(unittest.TestCase):
@@ -29,17 +44,28 @@ class TestElfCalorieCalculator(unittest.TestCase):
         2000
         3000
 
-        5000
-
         4000
+
+        5000
+        6000
+
+        7000
+        8000
+        9000
+
+        10000
         """
-        self.assertEqual(get_total_calories_from_elf_with_most_calories(data), 6000)
+        sortedList = get_each_elf_total_calories_results_sorted_list(data)
+        self.assertEqual(get_top_one(sortedList), 24000)
+        self.assertEqual(get_top_three_summed(sortedList), 45000)
 
 
 def main():
     with open("input.dat", "r") as f_hdl:
         str_data = f_hdl.read()
-        print(get_total_calories_from_elf_with_most_calories(str_data))
+        sortedResults = get_each_elf_total_calories_results_sorted_list(str_data)
+        print(get_top_one(sortedResults))
+        print(get_top_three_summed(sortedResults))
 
 
 if __name__ == "__main__":
