@@ -9,6 +9,11 @@ import unittest
 import os
 from enum import Enum
 
+class Recommendation(Enum):
+    X = 1 # Need to lose
+    Y = 2 # Draw
+    Z = 3 # Need to win
+
 
 class YourMove(Enum):
     X = 1 # Rock
@@ -50,6 +55,21 @@ outcome_table = {
     (YourMove.Z, OpponentMove.C): Outcome.DRAW, # Same shape
     (YourMove.Z, OpponentMove.A): Outcome.LOST, # Their Rock defeats your Scissors
     (YourMove.Z, OpponentMove.B): Outcome.WIN, # Your Scissors defeats thir Paper
+}
+
+
+recommendation_table = {
+    (OpponentMove.A, Recommendation.X): YourMove.Z, # Opponent Rock, recommend: Lose, choose: Scissors
+    (OpponentMove.A, Recommendation.Y): YourMove.X, # Opponent Rock, recommend: Draw, choose: Rock
+    (OpponentMove.A, Recommendation.Z): YourMove.Y, # Opponent Rock, recommend: Win, choose: Paper
+
+    (OpponentMove.B, Recommendation.X): YourMove.X, # Opponent Paper, recommend: Lose, choose: Rock
+    (OpponentMove.B, Recommendation.Y): YourMove.Y, # Opponent Paper, recommend: Draw, choose: Paper
+    (OpponentMove.B, Recommendation.Z): YourMove.Z, # Opponent Paper, recommend: Win, choose: Scissors
+
+    (OpponentMove.C, Recommendation.X): YourMove.Y, # Opponent Scissors, recommend: Lose, choose: Paper
+    (OpponentMove.C, Recommendation.Y): YourMove.Z, # Opponent Scissors, recommend: Draw, choose: Scissors
+    (OpponentMove.C, Recommendation.Z): YourMove.X, # Opponent Scissors, recommend: Win, choose: Rock
 }
 
 
@@ -99,7 +119,12 @@ def calculate_total_score(moves: str) -> tuple[int, int]:
         if (len(move) < 2):
             continue
         their_move = OpponentMove[move[0]]
-        your_move = YourMove[move[1]]
+
+        # calculate your move
+        recommendation = Recommendation[move[1]]
+        recommended_move = recommendation_table[(their_move, recommendation)]
+        your_move = recommended_move
+
         game_result = score_single_round(your_move, their_move)
         your_total_score += game_result[0]
         their_total_score += game_result[1]
@@ -119,7 +144,7 @@ class TestHarness(unittest.TestCase):
         B X
         C Z
         """
-        self.assertEqual(calculate_total_score(data), (15, 15))
+        self.assertEqual(calculate_total_score(data), (12, 15))
 
 
 def main():
@@ -128,9 +153,9 @@ def main():
         print(calculate_total_score(str_data))
         
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
 
 
-# if __name__ == '__main__':
-#    unittest.main()
+if __name__ == '__main__':
+   unittest.main()
