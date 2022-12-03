@@ -45,6 +45,40 @@ def find_sum_of_all_duplicates(rawdata: str) -> int:
     return current_sum
 
 
+def sanitize_data(raw_str: str) -> "list[str]":
+    lines = raw_str.split(os.linesep)
+    return [a.strip() for a in lines if a.strip() != ""]
+
+
+def build_groups_of_three(lines: "list[str]") -> "list[list[set]]":
+    groups = []
+    cur_set_list = None
+    for i, line in enumerate(lines):
+        if i % 3 == 0:
+            # start a new group
+            groups.append([])
+            if cur_set_list is None:
+                cur_set_list = 0
+            else:
+                cur_set_list += 1
+        groups[cur_set_list].append(set(line))
+    return groups
+
+
+def get_elf_badge_int_value_from_group(group: "list[set]") -> int:
+    common_value = list(group[0].intersection(group[1]).intersection(group[2]))[0]
+    return int(get_priority_table()[common_value])
+
+
+def find_sum_of_elf_group_common_badges(rawdata: str) -> int:
+    current_sum = 0
+    lines = sanitize_data(rawdata)
+    groups = build_groups_of_three(lines)
+    for group in groups:
+        current_sum += get_elf_badge_int_value_from_group(group)
+    return current_sum
+    
+
 class TestHarness(unittest.TestCase):
 
     def test_get_compartments_data(self):
@@ -71,11 +105,35 @@ class TestHarness(unittest.TestCase):
         result = find_sum_of_all_duplicates(data)
         self.assertEqual(result, 157)
 
+    def test_build_groups_of_three(self):
+        data = """vJrwpWtwJgWrhcsFMMfFFhFp
+        jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+        PmmdzqPrVvPwwTWBwg
+        wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+        ttgJtRGJQctTZtZT
+        CrZsJsPPZsGzwwsLwLmpwMDw
+        """
+        lines = sanitize_data(data)
+        groups = build_groups_of_three(lines)
+        self.assertEqual(len(groups), 2)
+    
+    def test_find_sum_of_elf_group_common_badges(self):
+        data = """vJrwpWtwJgWrhcsFMMfFFhFp
+        jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL
+        PmmdzqPrVvPwwTWBwg
+        wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn
+        ttgJtRGJQctTZtZT
+        CrZsJsPPZsGzwwsLwLmpwMDw
+        """
+        result = find_sum_of_elf_group_common_badges(data)
+        self.assertEqual(result, 70)
+
 
 def main():
     with open("input.dat", "r") as f_hdl:
         str_data = f_hdl.read()
-        print(find_sum_of_all_duplicates(str_data))
+        #print(find_sum_of_all_duplicates(str_data))
+        print(find_sum_of_elf_group_common_badges(str_data))
         
 
 if __name__ == "__main__":
