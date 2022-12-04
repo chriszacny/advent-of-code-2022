@@ -5,7 +5,6 @@ TODO: This is HACKY code. These functions need to be split and a lot of error co
 """
 
 import unittest
-import string
 import os
 
 
@@ -21,6 +20,7 @@ def determine_if_range_contained_in_another_range(range1: "tuple[int, int]", ran
         if v not in list2:
             return False
     return True
+
 
 def determine_if_any_overlap_in_range(range1: "tuple[int, int]", range2: "tuple[int, int]") -> bool:
     list1 = [a for a in range(range1[0], range1[1] + 1)]
@@ -59,6 +59,7 @@ def calculate_answer_part_one(data: "list[str]") -> int:
             answer += 1
             continue
     return answer
+
 
 def calculate_answer_part_two(data: "list[str]") -> int:
     """
