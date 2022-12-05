@@ -72,10 +72,6 @@ def build_stacks(stacks_input_data: str) -> list[Stack]:
     return stacks
 
 
-def normalize_moves_input_data(moves_input_data: str) -> str:
-    return ""
-
-
 def parse_instruction_line(line: str) -> tuple[int, int, int]:
     """
     Return (count to move, the from stack, the target stack)
