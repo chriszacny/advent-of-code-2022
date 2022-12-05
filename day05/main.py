@@ -99,19 +99,17 @@ def move_stacks_and_return_top_of_each_stack(stacks_input_data: str, instruction
     to_return = ""
     stacks = build_stacks(stacks_input_data)
     instructions = build_instructions(instructions_input_data)
-    for c, v in enumerate(instructions):
+    for _, v in enumerate(instructions):
         count_of_crates_to_move = v[0]
         stack_to_move_crates_from = v[1]
         stack_to_move_crates_to = v[2]
         #print(f"STACKS: {stacks}")
         #print(f"Move {count_of_crates_to_move} crates from stack {v[1]} to stack {v[2]}")
+        temp_list = []
         for i in range(0, count_of_crates_to_move):
-            try:
-                from_crate = stacks[stack_to_move_crates_from - 1].pop()
-                stacks[stack_to_move_crates_to - 1].push(from_crate)
-            except IndexError:
-                #print(f"at instruction {c + 1}")
-                sys.exit()
+            temp_list.insert(0, stacks[stack_to_move_crates_from - 1].pop())
+        for c in temp_list:
+            stacks[stack_to_move_crates_to - 1].push(c)
     for stack in stacks:
         to_return += stack.pop()
     return to_return
@@ -157,7 +155,7 @@ move 2 from 2 to 1
 move 1 from 1 to 2
         """
         answer = move_stacks_and_return_top_of_each_stack(stacks_input_data, instructions_input_data)
-        self.assertEqual("CMZ", answer)
+        self.assertEqual("MCD", answer)
 
 def main():
     with open("stacks.dat", "r") as f_hdl_stacks:
