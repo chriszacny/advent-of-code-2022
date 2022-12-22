@@ -1,7 +1,20 @@
+"""
+Advent of code 2022 Day 7. 
+
+TODO: This is HACKY code. These functions need to be split and a lot of error conditions checked for.
+In addition this code breaks a lot of rules of functional programming (lots of side effects and mutable data)
+probably because I went with more of a class-based approach for this one.
+
+"""
+
 import unittest
 import os
 from enum import Enum
 from abc import ABC, abstractmethod
+
+
+TOTAL_FS_DISK_SPACE=70000000
+UPDATE_SPACE_REQUIRED=30000000
 
 
 class NodeType(Enum):
@@ -41,6 +54,7 @@ class Filesystem:
         self.root.children = []
         self.current_node = None
         self.answer_one = 0
+        self.answer_two = 0
     
     def change_directory(self, directory: str) -> None:
         return None
@@ -53,21 +67,29 @@ class Filesystem:
                 self.calculate_directory_size(directory)
             cur_node.size = sum([x.size for x in cur_node.children])
 
-    def get_answer_one(self, cur_node):
-        # if len([x for x in cur_node.children if x.type == NodeType.Directory]) == 0:
-        #     if cur_node.size <= 100000:
-        #         print(cur_node.name)
-        #         self.answer_one += cur_node.size
-        # else:
+    def calculate_answer_one(self, cur_node):
         if cur_node.size <= 100000:
-            print(cur_node.name)
+            #print(cur_node.name)
             self.answer_one += cur_node.size
         for directory in [x for x in cur_node.children if x.type == NodeType.Directory]:
             #if directory.size <= 100000:
-            print(directory.name)
-            self.get_answer_one(directory)
-                #self.answer_one += directory.size
-                
+            #print(directory.name)
+            self.calculate_answer_one(directory)
+    
+    def find_closest_to_number(self, cur_dir, space_needed_to_free_up):
+        for directory in [x for x in cur_dir.children if x.type == NodeType.Directory]:
+            self.find_closest_to_number(directory, space_needed_to_free_up)
+        # compare current_answer to current dir size
+        if cur_dir.size >= space_needed_to_free_up and (cur_dir.size < self.answer_two or self.answer_two == 0):
+            self.answer_two = cur_dir.size
+
+    def calculate_answer_two(self):
+        total_used_space = self.root.size
+        unused_space = TOTAL_FS_DISK_SPACE - total_used_space
+        if unused_space >= UPDATE_SPACE_REQUIRED:
+            return 0
+        space_needed_to_free_up = UPDATE_SPACE_REQUIRED - unused_space
+        self.find_closest_to_number(self.root, space_needed_to_free_up)
 
     def __str__(self):
         return str(self.root)
@@ -180,7 +202,7 @@ class TestHarness(unittest.TestCase):
         #print(a_filesystem)
         a_filesystem.calculate_directory_size(a_filesystem.root)
         self.assertEqual(a_filesystem.root.size, 23361174)
-        a_filesystem.get_answer_one(a_filesystem.root)
+        a_filesystem.calculate_answer_one(a_filesystem.root)
         self.assertEqual(a_filesystem.answer_one, 8504)
 
     def test_full(self):
@@ -213,8 +235,13 @@ class TestHarness(unittest.TestCase):
         parsed_lines = parse_input_data(lines)
         a_filesystem = filesystem_factory(parsed_lines)
         a_filesystem.calculate_directory_size(a_filesystem.root)
-        a_filesystem.get_answer_one(a_filesystem.root)
+        a_filesystem.calculate_answer_one(a_filesystem.root)
         self.assertEqual(a_filesystem.answer_one, 95437)
+        total_used_space = a_filesystem.root.size
+        self.assertEqual(total_used_space, 48381165)
+        a_filesystem.calculate_answer_two()
+        self.assertEqual(a_filesystem.answer_two, 24933642)
+
 
 def main():
     with open("input.dat", "r") as f_hdl:
@@ -223,8 +250,10 @@ def main():
         parsed_lines = parse_input_data(lines)
         a_filesystem = filesystem_factory(parsed_lines)
         a_filesystem.calculate_directory_size(a_filesystem.root)
-        a_filesystem.get_answer_one(a_filesystem.root)
+        a_filesystem.calculate_answer_one(a_filesystem.root)
         print(a_filesystem.answer_one)
+        a_filesystem.calculate_answer_two()
+        print(a_filesystem.answer_two)
         
 
 if __name__ == "__main__":
